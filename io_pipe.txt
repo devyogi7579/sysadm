@@ -11,10 +11,44 @@ ls asdjasjkddj
 ls 2> /dev/null
 ls fdsdfdsb 2> /dev/null
 
-
 # to redirect STDOUT and STDERR to null device
 ls fdsdfdsb > /dev/null
 
 # simple pipe working
 cat /etc/passwd | wc -l
 
+# working with history cmd
+
+# to see history
+history
+
+# to find specific cmds
+history | grep cat
+
+# to clear terminal or current session history 
+history -c
+# to wipeout history from .bash_histroy file
+# history -w immediately after history -c
+
+# to clear histroy from specific line
+# history -d 2024 #linenumber
+
+# to update manpages
+sudo mandb
+
+# cmd to get sectionwise manpages
+man -k '' | grep '(1)' | less
+# likewise replace 1 with 2, 3 till 8
+
+# useful option to find correct man pages
+whatis passwd
+man 5 passwd
+# alternative
+man -f <cmd>
+man -k <cmd>
+
+# useful sections in man pages are
+/FILE
+/ERROR
+/EXITSTATUS
+/EXAMPLES
