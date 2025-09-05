@@ -1,0 +1,30 @@
+# three methods to create archive and compressed files
+# compression and archive for multiple files
+
+#gzip method --- Widely used
+# Compression and archive
+tar -czvf filename.tar.gz file1 file2 ...filen
+# Extract archives
+tar -xzvf filename.tar.gz
+
+# bzip2 --- better compression, slower
+# Compression and archive
+tar -cjvf filename.tar.bz2 file1 file2...filen
+# Extract archives
+tar -xjvf filename.tar.bz2
+
+#xz --- slow but highest compression
+# Compression and archive
+tar -cJvf filename.tar.xz file1 file2 ... filen
+# Extract archives
+tar -xJvf filename.tar.xz
+
+#==============================================================
+# compression and archive for single file
+
+#gzip method 
+# Compression
+gzip server.log		# creates server.log.gz 
+# Decompression
+gunzip server.log.gz
+
