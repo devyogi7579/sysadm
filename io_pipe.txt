@@ -1,0 +1,20 @@
+# to list content of dir
+ls
+
+# to redirect STDOUT to null device
+ls > /dev/null
+
+# to display STDOUT and STDERR 
+ls asdjasjkddj 
+
+# to redirect only STDERR to null device
+ls 2> /dev/null
+ls fdsdfdsb 2> /dev/null
+
+
+# to redirect STDOUT and STDERR to null device
+ls fdsdfdsb > /dev/null
+
+# simple pipe working
+cat /etc/passwd | wc -l
+
