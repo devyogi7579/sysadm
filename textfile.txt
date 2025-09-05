@@ -1,0 +1,26 @@
+# to see 1st five lines from the file
+head -n 5 /etc/passwd
+# to see last five lines from the file
+tail -n 5 /etc/passwd
+# to see 1st line from the last 5 lines from the files
+tail -n 5 /etc/passwd | tail -n 1
+# sort in alphabetical order
+sort /etc/passwd
+
+df -hT | sort -n
+df -hT | sort -rn
+df -hT | sort -k 3 -n
+
+grep $USER /etc/passwd
+
+awk -F : '{print $4}' /etc/passwd
+awk -F : '/user/ {print $4}' /etc/passwd
+
+# To print 5th line
+sed -n 5p /etc/passwd
+
+#sed -i s/old-txt/new-txt/g ~/myfile
+# sed -i -e '2d' ~/myfile
+
+
+
