@@ -1,0 +1,74 @@
+# to add user in rhel
+Step 1: Create the users with home directories
+#-----------------------------------------------#
+sudo useradd -m amy
+sudo useradd -m betty
+
+This single command does all of the following:
+* Adds the user to /etc/passwd, /etc/shadow, and /etc/group.
+* Creates the directory /home/amy and /home/betty.
+* Copies all the default files from /etc/skel/ (like .bashrc, .bash_profile, .bash_logout) into the new home directory.
+* Sets the correct ownership for the new home directory and files so the user owns them.
+* assign /bin/bash shell by default, no need to assign shell using -s option
+
+Step 2: Set passwords for the users
+#----------------------------------------------#
+Set their passwords securely using the interactive passwd command:
+sudo passwd amy
+sudo passwd betty
+* You will be prompted to enter and confirm the password for each user.
+
+Step 3: Verification
+#----------------------------------------------#
+# Check the user entry (look at the home directory path)
+grep amy /etc/passwd
+
+# Check the home directory exists and has the right owner
+ls -la /home/amy/
+
+# Check the permissions of the home directory
+ls -ld /home/amy
+
+#==========================================================================================================#
+# In ubuntu, we have single cmd to create user and set password
+sudo adduser betty
+# this will default assign /bin/bash shell, else default shell we get with useradd is /bin/sh
+
+#==========================================================================================================#
+# For a standard, clean removal of a user on both RHEL and Ubuntu, 
+sudo userdel -r username
+
+#==========================================================================================================#
+# password management
+# chage and passwd does the same job
+sudo chage -l bob
+sudo chage -E 2025-12-31 bob
+sudo passwd -n 366 -w 30 -x 90 bob
+# n = no of days, w = warning before expiry, x = expiry of password for the user
+# Verifiy the new password changes
+sudo chage -l bob
+#==========================================================================================================#
+# Managing group account
+
+sudo groupadd accounts
+sudo groupadd sales
+cat /etc/group | tail -5
+
+sudo adduser alexa
+sudo adduser alex
+sudo adduser smith
+sudo adduser babu
+
+usermod -aG sales alexa
+usermod -aG sales alex
+usermod -aG accounts smith
+usermod -aG accounts babu
+#===========================================================================================#
+#to check user is part of which group, we can have
+id alex
+id alexa
+
+#or
+groups babu
+groups alexa
+
