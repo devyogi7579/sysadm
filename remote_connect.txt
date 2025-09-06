@@ -4,15 +4,18 @@
 ssh root@<remote-ip-address>
 
 # passwordless connection ---- safe and reliable method
-ssh-keygen -t ed25519 -C "your_email@example.com"
+ssh-keygen -t ed25519 -f ~/.ssh/prod_webserver_ed25519 -C "prod-webserver key"
+-t ed25519 → key type (modern + secure).
+-f  → tells SSH where to save the keypair with what name.
+-C  → comment stored inside the .pub file as a lablel, it helps to remind "what the key is for"
 
 # provide path
 Press Enter to accept the default path (~/.ssh/id_ed25519).
 Optionally set a passphrase (adds security).
 
 # This will create two files
-~/.ssh/id_ed25519 (private key – keep safe!)
-~/.ssh/id_ed25519.pub (public key – share with remote machine)
+~/.ssh/id_ed25519 (private key – keep safe inside host machine, DO NOT SHARE!)
+~/.ssh/id_ed25519.pub (public key – SHARE with REMOTE machine)
 
 #Copy the public key to the remote VM or cloud server
 ssh-copy-id user@<remote-vm-ip>
@@ -28,4 +31,38 @@ scp /absolute/path/to/host/dir/filename user@<remote-vm-ip>:/absolute/path/to/re
 # to copy content from remote machine to host machine
 scp user@<remote-vm-ip>:/absolute/path/to/remote/dir/file.txt /absolute/path/to/host/dir
 
+#===============================================================================================#
+# Workflow Summary
 
+Generate a keypair (per server/role)
+ssh-keygen -t ed25519 -f ~/.ssh/prod_webserver_ed25519
+~/.ssh/
+├── id_ed25519                 # Default key for personal use (e.g., GitHub, personal, etc.)
+├── id_ed25519.pub             # Its public key
+├── prod_webserver_ed25519     # Private key for production web server
+├── prod_webserver_ed25519.pub # Its public key
+├── db_backup_ed25519          # Private key for the database backup server
+└── db_backup_ed25519.pub      # Its public key
+├── test_ed25519               # Private key for Test server
+├── test_ed25519.pub           # Its public key
+├── dev_ed25519                # Private key for dev server
+├── dev_ed25519.pub            # Its public key
+├── caching_db_ed25519         # Private key for the caching database
+└── caching_db_ed25519.pub     # Its public key
+
+
+#Copy the public key
+ssh-copy-id -i ~/.ssh/prod_webserver_ed25519.pub user@prod-webserver
+
+#Use ssh-agent for convenience
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/prod_webserver_ed25519
+ssh user@prod-webserver   # no need for -i now
+
+#Verify server identity
+First connect will add it to known_hosts. From then on, SSH checks fingerprints automatically.
+
+# Quick mental map:
+Private key (client) = “Who am I?”
+Public key in authorized_keys (server) = “Who’s allowed in?”
+known_hosts (client) = “Am I talking to the real server?”
