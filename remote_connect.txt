@@ -1,0 +1,31 @@
+# to connect to remote server from host machine
+
+# password connection
+ssh root@<remote-ip-address>
+
+# passwordless connection ---- safe and reliable method
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+# provide path
+Press Enter to accept the default path (~/.ssh/id_ed25519).
+Optionally set a passphrase (adds security).
+
+# This will create two files
+~/.ssh/id_ed25519 (private key – keep safe!)
+~/.ssh/id_ed25519.pub (public key – share with remote machine)
+
+#Copy the public key to the remote VM or cloud server
+ssh-copy-id user@<remote-vm-ip>
+# user can be root or normal user, provide password of that user for one last time
+# after this you will login without password
+
+# Test the connection
+ssh user@<remote-vm-ip>
+
+# to copy content from remote machine to host machine
+scp /absolute/path/to/host/dir/filename user@<remote-vm-ip>:/absolute/path/to/remote/dir/
+
+# to copy content from remote machine to host machine
+scp user@<remote-vm-ip>:/absolute/path/to/remote/dir/file.txt /absolute/path/to/host/dir
+
+
