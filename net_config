@@ -1,0 +1,125 @@
+# basic commands related to network configuration
+whatis ip addr
+man 8 ip
+ip [ OPTIONS ] OBJECT { COMMAND | help }
+OPTIONS := { -V[ersion] | -h[uman-readable] | -s[tatistics] | -d[etails] | -r[esolve] | -iec | -f[amily] { inet | inet6 | link } | -4 | -6 | -B | -0 | -l[oops] { maximum-addr-
+               flush-attempts } | -o[neline] | -rc[vbuf] [size] | -t[imestamp] | -ts[hort] | -n[etns] name | -N[umeric] | -a[ll] | -c[olor] | -br[ief] | -j[son] | -p[retty] }
+OBJECT := { link | address | addrlabel | route | rule | neigh | ntable | tunnel | tuntap | maddress | mroute | mrule | monitor | xfrm | netns | l2tp | tcp_metrics | token | mac‐
+               sec | vrf | mptcp | ioam | stats }
+
+# some useful cmds
+ip addr show
+# To test internet connectivity
+ping 8.8.8.8	
+# To test DNS resolution
+ping google.com
+# To see your routing table
+ip route show
+#To see active connections
+ss -tuln
+# validating the availablity of ports and service
+ss -lt
+# finding the IP address of a website, use
+# 1 - nslookup
+nslookup www.dypimca.ac.in
+# or 
+# 2 - ping, avaoid it bcoz it let admin on other side about your machine ip
+ping www.dypimca.ac.in
+# 3: Using Online "DNS Lookup" Tools
+# https://www.nslookup.io/ or https://dnschecker.org/
+Type www.dypimca.ac.in into the search box.
+Select the record type A (which is for IPv4 addresses).
+
+# Traceroute: It is a network diagnostic tool used to map the path that packets take from host to destination ip, it finds problem and measure performance
+traceroute -4 172.67.167.239
+
+#dig: nslookup utility
+dig = Domain Information Groper
+Forward Lookup: dig www.dypimca.ac.in
+You asked: "What is the IP address for www.dypimca.ac.in?"
+Answer: 159.69.57.32
+
+Reverse Lookup: dig -x 159.69.57.32
+You asked: "What is the domain name for the IP 159.69.57.32?"
+Answer: static.32.57.69.159.clients.your-server.de
+
+# curl: curl  is  a tool for transferring data from or to a server using URLs. 
+# It supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS,
+# MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+
+safe, public websites and APIs is a perfect way to learn curl
+1. JSONPlaceholder (The Best for Testing API Features)
+2. HTTPBin (Great for Debugging & Advanced Features)
+3. Apple.com (Good for Testing Modern Web Features)
+
+The Core Four (CRUD Operations:- Create, Read, Update, Delete)
+HTTP Method	CRUD Equivalent		Description	
+POST		Create			Used to submit or create a new resource. The API will decide the new URL.
+GET		Read			Used to retrieve data. It should only fetch data, not change it.
+PUT		Update			Used to replace an entire resource.
+DELETE		Delete			Used to remove a resource.
+		PATCH			Used to apply partial modifications to a resource.	
+		HEAD			Identical to GET, but the server must not return a response body. It's used to retrieve only the headers and status code.
+		OPTIONS			Used to describe the communication options for the target resource. It returns the HTTP methods that the server supports for a given URL.
+# API library Analogy:
+
+POST: Donating a new book to the library. The librarian gives it a new shelf location (ID).
+GET: Looking up a book's information by its call number (ID). You're just reading, not changing anything.
+PUT: Replacing a damaged book with a brand new, complete copy of the same edition.
+PATCH: Just updating the book's record to mark it as "checked out."
+DELETE: Removing the book's record from the system and pulping the book.
+HEAD: Checking if a book with a specific call number exists without getting all its details.
+OPTIONS: Asking the librarian, "What can I do with this book? Can I check it out? Renew it?"
+
+# GET (Default, no -X needed)
+curl https://api.example.com/posts
+
+# POST
+curl -X POST https://api.example.com/posts -H "Content-Type: application/json" -d '{"title":"My Post"}'
+
+# PUT
+curl -X PUT https://api.example.com/posts/1 -H "Content-Type: application/json" -d '{"id":1, "title":"New Title"}'
+
+# DELETE
+curl -X DELETE https://api.example.com/posts/1
+
+# PATCH
+curl -X PATCH https://api.example.com/posts/1 -H "Content-Type: application/json" -d '{"title":"Patched Title"}'
+
+# HEAD
+curl -I https://api.example.com/posts/1 # -I is shortcut for -X HEAD
+
+# OPTIONS
+curl -X OPTIONS https://api.example.com/posts -i
+
+# To save content to a file
+curl -o curl_wiki_page.html https://en.wikipedia.org/wiki/CURL
+
+# Legal aspect of using curl cmd
+curl itself is just a tool; the legality heavily depends on what data you take, how you take it, and what you do with it. 
+Websites communicate their scraping preferences through a robots.txt file (e.g., https://example.com/robots.txt).
+This file tells web crawlers which parts of the site they are allowed to access.
+It is not a legally binding document, but ignoring it is:
+	A strong ethical violation.
+	Powerful evidence in court that you intentionally accessed the site in a way the owner forbade.
+If a robots.txt file disallows crawling the pages you are accessing, you are on very shaky ground.
+Refer, Example: https://www.espncricinfo.com/robots.txt
+https://zerodha.com/robots.txt
+https://www.tradingview.com/robots.txt
+# for creating and maintaining the robots.txt file typically belongs to the Technical SEO Manager/Expert or a Senior Web Developer/Engineer, 
+# often in close collaboration with the Product Team and Legal Team.
+
+# mtui
+Text User Interface for controlling NetworkManager
+# nmcli 
+command-line tool for controlling NetworkManager
+
+nmcli general permissions 
+nmcli -a
+nmcli con show 
+nmcli general status
+nmcli general hostname
+nmcli general permissions
+nmcli general logging
+nmcli connection show
+nmcli device status 
