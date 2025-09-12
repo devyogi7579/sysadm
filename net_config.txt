@@ -110,16 +110,28 @@ https://www.tradingview.com/robots.txt
 # often in close collaboration with the Product Team and Legal Team.
 
 # mtui
-Text User Interface for controlling NetworkManager
-# nmcli 
-command-line tool for controlling NetworkManager
+Text User Interface for controlling NetworkManager, curses-based text user interface (TUI) for NetworkManager. 
+It's a menu-driven tool that runs directly in your terminal.
 
-nmcli general permissions 
-nmcli -a
-nmcli con show 
+# nmcli 
+command-line tool for controlling NetworkManager, mostly used for scriptig on servers which dont have GUI
+
+# Viewing Status:
 nmcli general status
-nmcli general hostname
-nmcli general permissions
-nmcli general logging
+nmcli device status
 nmcli connection show
-nmcli device status 
+
+# Connecting to Wi-Fi:
+nmcli device wifi list              			# Scan and list available Wi-Fi networks
+nmcli device wifi connect SSID password PASSWORD  	# Connect to a new network
+nmcli connection up "My Home WiFi"  			# Activate a previously saved connection
+
+# Managing Connections:
+nmcli connection add type ethernet ifname eth0  		# Create a new ethernet profile
+nmcli connection modify "My Home WiFi" ipv4.dns "1.1.1.1"  	# Change DNS for a profile
+nmcli connection down "My Home WiFi"            		# Disconnect a profile
+nmcli connection delete "Old Network"           		# Delete a saved profile
+
+# Troubleshooting:
+nmcli device monitor      				# Monitor network activity for changes in real-time
+
