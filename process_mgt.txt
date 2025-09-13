@@ -1,0 +1,122 @@
+# processes are
+1. Shell jobs:- are cmds started from cmd line
+2. Daemons:- are processes that started with computer booting and run with root previleges
+3. Kernel: do not play with these processes, it will bring entire system down
+
+# When a process is started it can use multiple threads,
+3. thread:- is a task started by a process with dedicated CPU.
+
+# Shell jobs management
+&:- (used at the end of cmd line) = starts cmd in background
+ctrl+Z:- to stops the job
+ctrl+D:- to indicate, stop waiting for further input
+ctrl+C:- to cancel the job
+bg:- to continue job running in bg
+fg:- to bring back job in fg
+jobs:- show which jobs are currently running in the background
+
+# ways to manage processes:
+ps:- gives overview of currently running processes, started by CURRENT USER
+ps aux:- it gives short summary
+* Kernel Threads: Name in Brackets: Their command (CMD) is almost always shown in square brackets [ ].
+--- Examples: [kthreadd], [ksoftirqd/0], [kswapd0], [scsi_eh_0].
+--- PPID is 2: Their parent process is almost always kthreadd (which has PID 2). This is the kernel thread daemon that spawns all other kernel threads.
+--- No TTY: They have ? in the TTY column, meaning they are not attached to a terminal.
+--- VSZ/RSS is 0: In the ps aux section, their Virtual and Resident memory sizes are 0 because they reside in kernel space, not user space.
+
+* Daemons / System Services: These are long-running background programs that provide services to the system or other programs.
+--- PPID is 1: Their parent process is almost always systemd (or init) which has PID 1. The init system is responsible for starting and managing all system services.
+--- No TTY: Like kernel threads, they have ? in the TTY column because they run in the background, detached from any user's terminal.
+--- Executable Path: The CMD is a full path to a binary in standard directories like /usr/sbin/, /usr/libexec/, /usr/lib/, etc.
+--- Often run by specific users: They often run under a dedicated system user (e.g., syslog, avahi, polkitd, messagebus) instead of root, for security reasons.
+
+* User Commands / Interactive Processes: These are programs started by a user, either directly from a shell/terminal or through a graphical interface (which itself is a daemon or user process).
+--- Attached to a TTY: They will have a terminal device (e.g., pts/0, tty2, pts/1) in the TTY column, not ?. This shows they are attached to a user's login session.
+--- PPID is not 1 or 2: Their parent will be a shell (like bash), a display manager (gdm3), or another user process.
+--- Run by a user account: The USER is a regular user login (e.g., av7579 in your list), not a system user like root, syslog, etc.
+--- Often short-lived: They may run and exit quickly (unlike daemons which run forever).
+
+ps aux | head
+ps aux | tail
+ps -ef
+ps fax : it tells heirarchical relation between parent and child processes...
+
+# nice and renice values
+--- these values adjust the process priority
+--- +20 = low priority
+--- -20 = high priority
+# nice -n 5 dd if=/dev/zero of=/dev/null &
+regular user can only decrease the priority of running process
+# renice -n 10 6689
+root user can increase the priority of running process
+
+# signal
+man 7 signal
+kill -l
+
+to ask a process to stop: SIGTERM (15)
+to force a process to stop: SIGKILL (9)
+killall
+pkill
+
+# Linux, process state overview
+R = running --- currently active process
+S = sleepig --- process waiting for an event to complete
+D = uninterruptible sleep --- sleep state that cannot be stopped
+T = Stopped --- process that has been stopped
+Z = Zombie --- process has been stopped but could not be removed
+
+# to know about load average
+uptime
+total time in hrs for system being ON
+number of active users
+load avg = 1min 5min 15min
+# rule of thumb
+avg load should not be greater than no of cpu, in your system
+lscpu = will tell how many cpus you have in your system
+
+# to optimize performance
+#==============================#
+tuned:- its a daemon that monitor system activity and provides some profile
+tuned is a powerful tool, but it's not something you need for every system. 
+Its value becomes clear in specific scenarios where performance or power efficiency is critical.
+
+man 8 tuned-adm
+
+sudo apt install tuned
+# Starting and Enabling the Service
+sudo systemctl start tuned
+sudo systemctl enable tuned
+
+# See what profiles are available and get a recommendation:
+tuned-adm list
+tuned-adm recommend
+
+# Choose and activate a profile
+# For a cloud server (AWS, Azure, GCP, Oracle, etc.)
+sudo tuned-adm profile virtual-guest
+
+# For a laptop where you want to save power
+sudo tuned-adm profile powersave
+
+# For a high-performance desktop/server
+sudo tuned-adm profile throughput-performance
+
+# For a database server (like the one you mentioned)
+sudo tuned-adm profile postgresql
+
+# Verify the change took effect:
+tuned-adm active
+# Expected output: "Current active profile: virtual-guest"
+
+# The profiles are usually split into two main types:
+1. Power-saving profiles: powersave, laptop-battery-powersave, etc.
+2. Performance profiles: throughput-performance, virtual-guest, network-latency, postgresql, oracle, etc.
+
+# Your Decision Flowchart, when to use tuned
+--- Is the system a Cloud VM? -> Yes -> Enable virtual-guest.
+--- Is it a laptop? -> Yes -> Use powersave on battery, balanced when plugged in.
+--- Is it a specific server (DB, web app)? -> Yes -> Use the corresponding profile (postgresql, throughput-performance).
+--- Do you need to save power on a server? -> Yes -> Use powersave.
+--- None of the above? -> Stick with the default balanced profile or use tuned-adm recommend to get a suggestion.
+
