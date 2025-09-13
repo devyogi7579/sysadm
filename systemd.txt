@@ -1,0 +1,112 @@
+systemctl - Control the systemd system and service manager
+it's a large suite of software that provides a central system and service manager for Linux operating systems.
+
+systemd is an init system. It is the first process that starts during boot (PID 1) and is the last process to terminate during shutdown. 
+It is responsible for bringing the system up into a usable state by starting all other processes, daemons, and services.
+It's now an integrated platform for managing the system, including:
+--- Service management (Starting, stopping, reloading, enabling services on boot)
+--- Mounting filesystems
+--- Logging (via journald)
+--- Managing hardware events (via udev, which is part of systemd)
+--- User sessions
+--- Scheduled tasks (replacing cron for some uses via timers)
+--- Network configuration
+
+Key systemd Components and Commands
+# 1. Units and Unit Files
+systemd manages resources through units. A unit is a configuration file that describes a resource and how to manage it. There are different types of units:
+--- Service units (.service): The most common type, for managing daemons.
+--- Mount units (.mount): For managing filesystem mount points.
+--- Timer units (.timer): For scheduling tasks (like cron jobs).
+--- Socket units (.socket): For socket-based activation (start a service on first connection).
+
+*************************IMPORTANT********************************
+# Unit files are stored in:
+1) /usr/lib/systemd/system/: Default unit files provided by installed packages.
+Example:
+ls /usr/lib/systemd/system/ 
+cat /usr/lib/systemd/system/accounts-daemon.service
+#---------------------------------------------------------------#
+2) /etc/systemd/system/: User-created or customized unit files. 
+This directory takes precedence.
+Example:
+cat /etc/systemd/system/syslog.service 
+#---------------------------------------------------------------#
+3) /run/systemd/system/: Contains unit files that have generated automatically
+Example: 
+cat /run/systemd/system/netplan-ovs-cleanup.service 
+******************************************************************
+
+# 2. Core Command: systemctl
+This is the primary command to inspect and control the state of the systemd system and service manager.
+
+# 2.a) Managing Services:
+sudo systemctl start apache2.service        # Start a service
+sudo systemctl stop apache2.service         # Stop a service
+sudo systemctl restart apache2.service      # Restart a service
+sudo systemctl reload apache2.service       # Reload config (if supported)
+sudo systemctl status apache2.service       # Check status (crucial for debugging!)
+
+# 2.b) Enabling/Disabling Services (Start on Boot):
+sudo systemctl enable apache2.service       # Enable service to start at boot
+sudo systemctl disable apache2.service      # Disable automatic start at boot
+sudo systemctl is-enabled apache2.service   # Check if enabled
+
+# 2.c) Viewing System State:
+systemctl list-units                        # List active units
+systemctl list-unit-files                   # List all installed unit files
+systemctl list-dependencies apache2.service # Show dependencies for a unit
+systemctl is-active apache2.service         # Check if a unit is active
+
+# 3. Viewing Logs: journalctl
+Since systemd captures all logs from services it manages, you use journalctl to query them. It's a powerful replacement for tail -f /var/log/syslog.
+Basic Usage:
+sudo journalctl -u apache2.service          # Show logs for a specific service
+sudo journalctl -f -u apache2.service       # Follow (tail -f) logs for a service
+sudo journalctl -p err -b                   # Show all errors since last boot
+sudo journalctl --since "2024-01-01 00:00:00" --until "2024-01-01 12:00:00"
+
+# 4. Analyzing Boot Performance: systemd-analyze
+This tool helps you understand your system's boot process.
+systemd-analyze time                    # Show total time spent on boot
+systemd-analyze blame                   # Show time each unit took to start
+systemd-analyze critical-chain          # Show a tree of the boot process
+systemd-analyze plot > bootplot.svg     # Generate a detailed SVG of the boot process
+
+#===================================================================================#
+# Who Creates These Unit Files?
+Unit files are created by two main groups:
+1st. Software Packages (The vast majority)
+#--------------------------------------------#
+The people who packaged the software know how their software should be started, stopped, and managed. 
+They create the unit file so that when you install the software, it automatically integrates with systemd.
+
+2nd. System Administrators  (when needed)
+#--------------------------------------------#
+You would need to create or modify a unit file yourself in these scenarios:
+
+Scenario A: You are running a custom application or script that you wrote.
+You have a Python script or a Java JAR file that you need to run automatically when the server boots, and you want it to restart if it crashes.
+Why a unit file? 
+Because systemd can manage it for you: start on boot, restart on failure, collect its logs, etc. 
+It's much more robust than just adding your script to /etc/rc.local.
+
+Scenario B: You need to change how a packaged service behaves.
+The unit file from the package is almost perfect, but you need to add an environment variable or change a startup option.
+You don't edit /usr/lib/systemd/system/nginx.service!
+Why? 
+Because your changes will be overwritten the next time you update the nginx package.
+The Correct Way: You create a new file in /etc/systemd/system/. This directory overrides the default one.
+#==================================================================================#
+
+A unit file tells systemd everything it needs to know about a process in a simple, declarative way:
+
+What it tells systemd	       Example (from a hypothetical service)	                Why it's Important
+#------------------------------------------------------------------------------------------------------------------------#
+Description	            Description=My Awesome API Server	                        So you know what the service is.
+What to run	            ExecStart=/usr/bin/python3 /app/api.py	                The exact command to start the process.
+When to run it	            After=network.target postgresql.service	                "Don't start me until the network and database are ready." This solves dependency issues.
+How to run it	            Type=simple	                                                How systemd should monitor the process.
+What to do if it crashes    Restart=on-failure	                                        "If it exits with an error, please restart it automatically." This makes services resilient.
+Who to run it as	    User=api-user	                                        For security, don't run everything as root.
+Where to put its logs	    (Not needed! journald captures all output automatically)	Massive advantage: All logs a
