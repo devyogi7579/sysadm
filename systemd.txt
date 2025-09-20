@@ -19,6 +19,12 @@ systemd manages resources through units. A unit is a configuration file that des
 --- Mount units (.mount): For managing filesystem mount points.
 --- Timer units (.timer): For scheduling tasks (like cron jobs).
 --- Socket units (.socket): For socket-based activation (start a service on first connection).
+--- automount
+--- swap
+--- timer
+--- path 
+--- slice
+--- scope
 
 *************************IMPORTANT********************************
 # Unit files are stored in:
