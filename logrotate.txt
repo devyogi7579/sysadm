@@ -1,0 +1,116 @@
+Creating a custom logrotate configuration file for your application is the perfect way to manage its logs.
+
+Here’s a step-by-step guide on how to do it, along with a template you can use.
+
+### Step 1: Create a Configuration File for Your App
+You will create a new file in the `/etc/logrotate.d/` directory. 
+The name should describe your application (e.g., `my-app`, `my-api`, `my-backend`).
+
+sudo nano /etc/logrotate.d/my-app
+
+
+### Step 2: Write the Logrotate Rule
+Here is a robust, well-commented template you can adapt for your application. 
+The structure defines which logs to rotate and how to do it.
+
+# Rotate logs for my-app
+/var/log/my-app/*.log /var/log/my-app/*.json {
+    # How often to rotate: daily, weekly, monthly, or yearly
+    daily
+
+    # Keep 30 rotated log files before deleting the oldest
+    rotate 30
+
+    # Compress the rotated logs to save space (creates .gz files)
+    compress
+
+    # Delay compression by one rotation. This means the most
+    # recent rotated log (.1) will not be compressed, making
+    # it easier to tail or read if needed.
+    delaycompress
+
+    # If the log file is missing, don't throw an error; just skip it.
+    missingok
+
+    # Don't rotate the log if it is empty
+    notifempty
+
+    # Create a new empty log file after rotation with these permissions
+    # Syntax: create [mode] [owner] [group]
+    create 0644 myuser mygroup
+
+    # Run the postrotate script only once for all matched logs,
+    # not once for each log file.
+    sharedscripts
+
+    # This script runs after the rotation is complete.
+    # It's used to signal your application to start writing to the new log file.
+    postrotate
+        # Example 1: If your app uses a PID file, send a signal to reload logs
+        # kill -USR1 $(cat /var/run/my-app.pid) 2>/dev/null || true
+
+        # Example 2: If your app is managed by systemd, restart it gracefully
+        # systemctl reload my-app.service > /dev/null 2>&1 || true
+
+        # Example 3: If your app can reload itself via a custom script
+        # /opt/my-app/scripts/reload-logs.sh > /dev/null 2>&1 || true
+    endscript
+}
+
+
+### Step 3: Customize the Template (Crucial Steps)
+You must customize the following parts of the template:
+
+1.  Log File Paths: Change `/var/log/my-app/*.log` to the actual path of your application's log files.
+	    *   *Example:* `/opt/my-app/logs/output.log`
+
+2.  User/Group for `create`: Change `myuser` and `mygroup` to the user and group that your application runs as. 
+			     This ensures the new log file has the correct permissions for your app to write to it.
+	    *   Find this with: `ps aux | grep my-app`
+	    *   Common users: `www-data`, `nginx`, `ubuntu`, or a custom user you created.
+
+3.  The `postrotate` Script: This is the most important part. You must tell your application to close its current log file and open the new one. 
+			     If you don't, it will continue writing to the rotated, possibly compressed file (`my-app.log.1`), which breaks rotation.
+    	*   Uncomment and modify only one of the examples in the `postrotate` script.
+    	*   The most modern and reliable method is to use `systemctl reload YourApp.service` if your app is a systemd service.
+
+
+
+### Step 4: Test Your Configuration
+Before relying on it, always test your new configuration to avoid losing logs.
+
+1. Check for syntax errors: sudo logrotate -d /etc/logrotate.d/my-app
+
+The `-d` flag runs in "debug" mode and will show you what it *would* do without actually doing it. It will also output any errors.
+
+2. Force a test rotation: sudo logrotate -vf /etc/logrotate.d/my-app
+
+*   `-v`: verbose (shows what it's doing)
+*   `-f`: force (runs the rotation even if it's not scheduled yet)
+
+This command will execute the rotation immediately so you can verify the `postrotate` script works and the new log file is created correctly.
+
+### Example for a Systemd Service
+If your app `my-app` is managed by systemd and its logs are written to `/var/log/my-app/app.log`, your final config might look like this:
+
+/var/log/my-app/app.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0644 www-data www-data
+    sharedscripts
+    postrotate
+        systemctl reload my-app.service > /dev/null 2>&1 || true
+    endscript
+}
+
+
+### How It Gets Executed
+
+You don't need to do anything else! 
+The `logrotate` command is automatically run once a day by a cron job in `/etc/cron.daily/logrotate`. 
+Your new configuration file will be picked up automatically and your application's logs will be managed from now on.
+By doing this, you ensure your application's logs don't fill up your disk and are managed as professionally as the system's own services.
